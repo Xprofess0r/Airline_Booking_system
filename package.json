@@ -4,8 +4,8 @@
   "description": "Micro service for handling Flight CRUD",
   "main": "index.js",
   "scripts": {
-    "start": "node -e \"require('./src/startup')\"",
-    "test": "echo \"Error: no test specified\\\" && exit 1"
+    "start": "node src/startup.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,46 +1,76 @@
 /**
- * startup.js — Production entry point for Railway
- * 
- * Runs migrations, seeds (only if tables are empty),
- * then starts the Express server.
- * 
- * This avoids the shell chaining issues with:
- * "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node src/index.js"
+ * startup.js — Railway production boot sequence
+ * Connects to DB, runs migrations, seeds if needed, starts server.
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
+require('dotenv').config();
+const { Sequelize } = require('sequelize');
+const { execSync }  = require('child_process');
+const path          = require('path');
+
+const ROOT = path.resolve(__dirname, '..');
+
+// ── wait for DB to be actually reachable before migrating ──
+async function waitForDB(maxRetries = 10, delayMs = 3000) {
+  const cfg = require('./config/config.js').production;
+  for (let i = 1; i <= maxRetries; i++) {
+    try {
+      const seq = new Sequelize(cfg.database, cfg.username, cfg.password, {
+        host:           cfg.host,
+        port:           cfg.port,
+        dialect:        'mysql',
+        dialectOptions: cfg.dialectOptions,
+        logging:        false
+      });
+      await seq.authenticate();
+      await seq.close();
+      console.log('✔ Database is reachable');
+      return true;
+    } catch (err) {
+      console.log(`⏳ DB not ready (attempt ${i}/${maxRetries}): ${err.message}`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  throw new Error('✖ Could not connect to database after maximum retries');
+}
 
 function run(cmd) {
   console.log(`\n▶ ${cmd}`);
+  execSync(cmd, { stdio: 'inherit', cwd: ROOT });
+}
+
+async function boot() {
   try {
-    execSync(cmd, { stdio: 'inherit', cwd: path.resolve(__dirname, '..') });
+    // 1. Wait for DB
+    await waitForDB();
+
+    // 2. Run migrations
+    run('npx sequelize-cli db:migrate');
+
+    // 3. Seed only if Airplanes table is empty
+    try {
+      const db = require('./models/index');
+      const [[{ count }]] = await db.sequelize.query('SELECT COUNT(*) as count FROM Airplanes');
+      if (Number(count) === 0) {
+        console.log('\n▶ Seeding initial data...');
+        run('npx sequelize-cli db:seed:all');
+      } else {
+        console.log('\n▶ Skipping seeds — data already exists');
+      }
+      await db.sequelize.close();
+    } catch (seedErr) {
+      console.log('\n⚠ Seed check failed, attempting seed anyway:', seedErr.message);
+      try { run('npx sequelize-cli db:seed:all'); } catch (_) {}
+    }
+
+    // 4. Start Express server
+    console.log('\n▶ Starting server...');
+    require('./index');
+
   } catch (err) {
-    console.error(`✖ Command failed: ${cmd}`);
+    console.error('\n✖ Boot failed:', err.message);
     process.exit(1);
   }
 }
 
-// Step 1: Run migrations
-run('npx sequelize-cli db:migrate');
-
-// Step 2: Seed only if Airports table is empty (avoid duplicate seed errors)
-try {
-  const db = require('./models/index');
-  db.sequelize.query('SELECT COUNT(*) as count FROM Airports').then(([results]) => {
-    const count = results[0].count;
-    if (count === 0) {
-      run('npx sequelize-cli db:seed:all');
-    } else {
-      console.log('▶ Skipping seeds — data already exists');
-    }
-    // Step 3: Start server
-    require('./index');
-  }).catch(() => {
-    // Table might not exist yet after first migration — seed and start anyway
-    run('npx sequelize-cli db:seed:all');
-    require('./index');
-  });
-} catch (e) {
-  require('./index');
-}
+boot();
