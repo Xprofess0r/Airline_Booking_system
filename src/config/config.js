@@ -14,11 +14,11 @@ module.exports = {
     dialect: "mysql"
   },
   production: {
-    // If MYSQL_PUBLIC_URL exists, use it. Otherwise fall back to the internal MYSQL_URL
-    use_env_variable: process.env.MYSQL_PUBLIC_URL ? "MYSQL_PUBLIC_URL" : "MYSQL_URL",
+    // 1. We manually check for the URLs and assign them directly to the 'url' property
+    url: process.env.MYSQL_URL || process.env.MYSQL_PUBLIC_URL,
     dialect: "mysql",
     dialectOptions: {
-      connectTimeout: 60000 // Gives the container 60 seconds to establish a stable connection
+      connectTimeout: 60000
     }
   }
 };
