@@ -1,22 +1,25 @@
 module.exports = {
   development: {
     username: "root",
-    password: "@Xprofess0r123",
+    password: null,
     database: "flight_search_db",
     host: "127.0.0.1",
     dialect: "mysql"
   },
   test: {
     username: "root",
-    password: "@Xprofess0r123",
+    password: null,
     database: "flight_search_db_test",
     host: "127.0.0.1",
     dialect: "mysql"
   },
   production: {
-    // 1. We manually check for the URLs and assign them directly to the 'url' property
-    url: process.env.MYSQL_URL || process.env.MYSQL_PUBLIC_URL,
-    dialect: "mysql",
+    username: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    host:     process.env.MYSQLHOST,
+    port:     process.env.MYSQLPORT,
+    dialect:  "mysql",
     dialectOptions: {
       connectTimeout: 60000
     }
