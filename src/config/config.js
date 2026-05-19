@@ -14,11 +14,11 @@ module.exports = {
     dialect: "mysql"
   },
   production: {
-    username: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    host: process.env.MYSQLHOST,
-    port: parseInt(process.env.MYSQLPORT) || 3306,
-    dialect: "mysql"
+    // If MYSQL_PUBLIC_URL exists, use it. Otherwise fall back to the internal MYSQL_URL
+    use_env_variable: process.env.MYSQL_PUBLIC_URL ? "MYSQL_PUBLIC_URL" : "MYSQL_URL",
+    dialect: "mysql",
+    dialectOptions: {
+      connectTimeout: 60000 // Gives the container 60 seconds to establish a stable connection
+    }
   }
 };
