@@ -6,6 +6,7 @@ class CityRepository {
       const city = await City.create({ name });
       return city;
     } catch (error) {
+      console.error("Repository error [createCity]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -18,6 +19,7 @@ class CityRepository {
         },
       });
     } catch (error) {
+      console.error("Repository error [deleteCity]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -28,8 +30,7 @@ class CityRepository {
       const city = await City.findByPk(cityId);
       return city;
     } catch (error) {
-      console.log(error);
-      console.log("Somethign went wrong in the repository layer");
+      console.error("Repository error [getCity]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -41,7 +42,7 @@ class CityRepository {
       await city.save();
       return city;
     } catch (error) {
-      console.log("Something went wrong in the repository layer");
+      console.error("Repository error [updateCity]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -60,7 +61,8 @@ class CityRepository {
       const cities = await City.findAll();
       return cities;
     } catch (error) {
-      console.log("Somthing went wrong in the repository layer");
+      console.error("Repository error [getAllCities]:", error.message, error.stack);
+      throw { error };
     }
   }
 }

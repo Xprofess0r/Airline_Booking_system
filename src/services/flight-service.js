@@ -23,7 +23,7 @@ class FlightService {
       });
       return flight;
     } catch (error) {
-      console.log("Somthing went wrong at service layer");
+      console.error("Service error [createFlight]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -33,7 +33,8 @@ class FlightService {
       const flights = await this.flightRepository.getAllFlights(data);
       return flights;
     } catch (error) {
-      console.log("Somthing went wrong at service layer");
+      console.error("Service error [getAllFlightData]:", error.message, error.stack);
+      throw { error };
     }
   }
 
@@ -42,7 +43,8 @@ class FlightService {
       const flight = await this.flightRepository.getFlight(flightId);
       return flight;
     } catch (error) {
-      console.log("Something went wrong at service");
+      console.error("Service error [getFlight]:", error.message, error.stack);
+      throw { error };
     }
   }
 
@@ -52,7 +54,7 @@ class FlightService {
       const response = await this.flightRepository.updateFlight(flightId, data);
       return response;
     } catch (error) {
-      console.log("Somthing went wrong at service layer");
+      console.error("Service error [updateFlight]:", error.message, error.stack);
       throw { error };
     }
   }
