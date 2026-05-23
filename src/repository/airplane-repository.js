@@ -6,7 +6,7 @@ class AirplaneRepository {
       const airplane = await Airplane.findByPk(id);
       return airplane;
     } catch (error) {
-      console.log("Somthing went wrong in the repository layer");
+      console.error("Repository error [getAirplane]:", error.message, error.stack);
       throw { error };
     }
   }

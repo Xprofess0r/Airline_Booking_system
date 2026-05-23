@@ -27,7 +27,7 @@ class FlightRepository {
       const flight = await Flights.create(data);
       return flight;
     } catch (error) {
-      console.log("Something went wrong in the repository layer");
+      console.error("Repository error [createFlight]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -37,7 +37,7 @@ class FlightRepository {
       const flight = await Flights.findByPk(flightId);
       return flight;
     } catch (error) {
-      console.log("Something went wrong in the repository layer");
+      console.error("Repository error [getFlight]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -50,7 +50,7 @@ class FlightRepository {
       });
       return flights;
     } catch (error) {
-      console.log("Something went wrong in the repository layer");
+      console.error("Repository error [getAllFlights]:", error.message, error.stack);
       throw { error };
     }
   }
@@ -66,7 +66,7 @@ class FlightRepository {
       const updatedFlight = await Flights.findByPk(flightId);
       return updatedFlight;
     } catch (error) {
-      console.log("Something went wrong in repository layer");
+      console.error("Repository error [updateFlight]:", error.message, error.stack);
       throw { error };
     }
   }
