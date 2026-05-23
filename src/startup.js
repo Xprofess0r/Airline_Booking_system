@@ -57,10 +57,9 @@ async function boot() {
       } else {
         console.log('\n▶ Skipping seeds — data already exists');
       }
-      await db.sequelize.close();
+      // NOTE: do NOT close db.sequelize here — the app reuses this connection
     } catch (seedErr) {
-      console.log('\n⚠ Seed check failed, attempting seed anyway:', seedErr.message);
-      try { run('npx sequelize-cli db:seed:all'); } catch (_) {}
+      console.log('\n⚠ Seed check failed, skipping seeds:', seedErr.message);
     }
 
     // 4. Start Express server
